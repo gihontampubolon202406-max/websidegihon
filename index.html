@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makanan Tradisional Indonesia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background-color: #ff6b35;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .search {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .card h3 {
+            margin: 10px;
+            text-align: center;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+        .close {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background: #333;
+            color: white;
+        }
+        .menu {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.menu button {
+    padding: 10px;
+    font-size: 20px;
+}
+
+.menu-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+.notranslate {
+    translate: no;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="menu">
+    <button onclick="toggleMenu()">⋮</button>
+    <div id="menuContent" class="menu-content">
+
+        <div id="loginSection">
+            <h4>Login Admin</h4>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <p id="loginStatus"></p>
+        </div>
+
+        <div id="adminPanel" style="display:none;">
+    <h4>Tambah Makanan Baru</h4>
+
+    <input type="text" id="newName" placeholder="Nama Makanan"><br>
+    <label>Upload Gambar:</label><br>
+<input type="file" id="newImage" accept="image/*"><br><br>
+    <input type="text" id="newOrigin" placeholder="Asal Makanan"><br>
+    <input type="text" id="newIngredients" placeholder="Bahan-bahan"><br>
+    <input type="text" id="newTools" placeholder="Alat-alat"><br>
+    <input type="text" id="newRecipe" placeholder="Cara Membuat"><br>
+
+    <button onclick="addFood()">Tambah Makanan</button>
+    <button onclick="logout()">Logout</button>
+</div>
+
+    </div>
+</div>
+        <h1>Makanan Tradisional Indonesia</h1>
+        <p>Jelajahi keanekaragaman kuliner Nusantara!</p>
+        <div style="text-align:center; margin-top:10px;">
+    <div id="google_translate_element"></div>
+</div>
+    </header>
+    <div class="container">
+        <div class="search">
+            <input type="text" id="searchInput" placeholder="Cari makanan...">
+        </div>
+        <div class="grid" id="foodGrid">
+            <!-- Kartu makanan akan diisi oleh JS -->
+        </div>
+    </div>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle"></h2>
+            <img id="modalImage" src="" alt="" style="width:100%; height:200px; object-fit:cover; margin-bottom:10px;">
+            <p><strong>Asal:</strong> <span id="modalOrigin"></span></p>
+            <p><strong>Bahan:</strong> <span id="modalIngredients"></span></p>
+            <p><strong>Alat:</strong> <span id="modalTools"></span></p>
+            <p><strong>Cara Membuat:</strong> <span id="modalRecipe"></span></p>
+            
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2023 Makanan Tradisional Indonesia. Diedit oleh Gihon Ganteng.</p>
+    </footer>
+
+     <script>
+
+        const foods = [
+            {
+                name: "Rendang",
+                image: "images/Rendang.jpg",
+                origin: "Sumatera Barat",
+                ingredients: "daging sapi, santan kental, bawang merah, bawang putih, cabai merah, kemiri, jahe, lengkuas, kunyit, serai, daun jeruk, daun salam, daun kunyit, garam, gula.",
+                tools: "wajan/kuali, kompor, spatula/sendok kayu, pisau, talenan, blender/ulekan, baskom.",
+                recipe: "potong dan cuci daging sapi, haluskan bumbu, masukkan santan ke wajan, tambahkan bumbu halus, masukkan serai dan daun-daunan, masukkan daging sapi, masak sambil diaduk perlahan, tambahkan garam dan gula, masak hingga kuah mengering dan daging empuk, rendang siap disajikan."
+            },
+            {
+                name: "Nasi Goreng",
+                image: "images/Nasi_Goreng.jpg",
+                origin: "Indonesia umum (berasal dari Jawa)",
+                ingredients: "nasi putih, bawang putih, bawang merah, telur, kecap manis, minyak goreng, garam, merica.",
+                tools: "wajan, kompor, spatula, pisau, talenan, piring.",
+                recipe: "panaskan minyak di wajan, tumis bawang putih dan bawang merah, masukkan telur dan orak-arik, masukkan nasi putih, tambahkan kecap manis, garam, dan merica, aduk hingga rata dan matang, nasi goreng siap disajikan."
+            },
+            {
+                name: "Sate",
+                image: "images/Sate.jpg",
+                origin: "Jawa",
+                ingredients: "daging ayam/sapi, kecap manis, bawang putih, bawang merah, ketumbar, garam, gula, minyak goreng.",
+                tools: "pisau, talenan, tusuk sate, mangkuk, panggangan/arang, kipas atau alat bakar.",
+                recipe: "potong daging kecil-kecil, haluskan bawang putih bawang merah dan ketumbar, campurkan daging dengan bumbu kecap garam gula dan minyak, diamkan sebentar, tusuk daging ke tusuk sate, bakar sambil dibolak-balik, olesi sisa bumbu, bakar hingga matang, sate siap disajikan."
+            },
+            {
+                name: "Gado-Gado",
+                image: "images/Gado_Gado.jpg",
+                origin: "Jakarta",
+                ingredients: "sayur rebus (kangkung, tauge, kol, kentang), tahu, tempe, telur rebus, kacang tanah, bawang putih, cabai, gula merah, garam, air, jeruk nipis.",
+                tools: "pisau, talenan, panci, kompor, spatula/sendok, cobek/blender.",
+                recipe: "rebus sayuran hingga matang, goreng tahu dan tempe, haluskan kacang tanah bawang putih cabai gula merah dan garam, tambahkan air dan jeruk nipis, susun sayuran tahu tempe dan telur di piring, siram dengan bumbu kacang, gado-gado siap disajikan."
+            },
+            {
+                name: "Bakso",
+                image: "images/Bakso.jpg",
+                origin: "Surabaya",
+                ingredients: "daging sapi giling, tepung tapioka, bawang putih, telur, es batu, garam, merica, air.",
+                tools: "blender, panci, kompor, spatula/sendok, pisau, talenan, baskom.",
+                recipe: "Chaluskan daging sapi bawang putih dan es batu, masukkan telur garam dan merica lalu aduk rata, tambahkan tepung tapioka sedikit demi sedikit, bentuk adonan menjadi bulat, rebus air hingga mendidih, masukkan bakso hingga mengapung, angkat dan tiriskan, bakso siap disajikan."
+            },
+            {
+                name: "Soto Ayam",
+                image: "images/Soto_Ayam.jpg",
+                origin: "Jawa",
+                ingredients: "ayam, air, bawang putih, bawang merah, kemiri, kunyit, jahe, serai, daun jeruk, daun salam, garam, gula, minyak goreng.",
+                tools: "panci, kompor, pisau, talenan, spatula/sendok, mangkuk.",
+                recipe: "rebus ayam hingga matang lalu suwir dagingnya, haluskan bawang putih bawang merah kemiri kunyit dan jahe, tumis bumbu halus hingga harum, masukkan serai daun jeruk dan daun salam, tuang air kaldu ayam, masukkan ayam suwir, tambahkan garam dan gula, masak hingga mendidih dan bumbu meresap, soto ayam siap disajikan."
+            },
+            {
+                name: "Pempek",
+                image: "images/Pempek.jpg",
+                origin: "Palembang",
+                ingredients: "ikan giling, tepung tapioka, bawang putih, telur, air es, garam, gula, cuka.",
+                tools: "baskom, panci, kompor, spatula/sendok, pisau, talenan.",
+                recipe: "campurkan ikan giling bawang putih garam gula dan telur, tambahkan air es sedikit demi sedikit, masukkan tepung tapioka hingga adonan bisa dibentuk, bentuk adonan sesuai selera, rebus pempek dalam air mendidih hingga mengapung, angkat dan tiriskan, pempek siap disajikan."
+            },
+            {
+                name: "Gudeg",
+                image: "images/Gudeg.jpg",
+                origin: "Yogyakarta",
+                ingredients: "nangka muda, santan, bawang merah, bawang putih, ketumbar, lengkuas, daun salam, gula merah, garam.",
+                tools: "panci, kompor, pisau, talenan, spatula/sendok, baskom.",
+                recipe: "potong dan cuci nangka muda, haluskan bawang merah bawang putih dan ketumbar, masukkan nangka ke panci, tambahkan bumbu halus daun salam dan lengkuas, tuang santan, tambahkan gula merah dan garam, masak dengan api kecil hingga nangka empuk dan kuah mengental, gudeg siap disajikan."
+            },
+            {
+                name: "Ayam Goreng",
+                image: "images/Ayam_Goreng.jpg",
+                origin: "Jawa",
+                ingredients: "ayam, air, bawang putih, bawang merah, ketumbar, kunyit, lengkuas, daun salam, gula merah, garam, minyak goreng.",
+                tools: "panci, wajan, kompor, pisau, talenan, spatula/sendok.",
+                recipe: "potong ayam dan cuci bersih, haluskan bawang putih bawang merah ketumbar dan kunyit, rebus ayam dengan bumbu halus daun salam dan lengkuas hingga empuk dan bumbu meresap, angkat ayam, goreng ayam dalam minyak panas hingga kecokelatan, ayam goreng khas Jawa siap disajikan."
+            },
+            {
+                name: "Nasi Uduk",
+                image: "images/Nasi_Uduk.jpg",
+                origin: "Jakarta",
+                ingredients: "beras, santan, air, serai, daun salam, daun pandan, garam.",
+                tools: "panci, kompor, spatula/sendok, mangkuk.",
+                recipe: "cuci beras hingga bersih, masukkan beras ke panci, tambahkan santan dan air, masukkan serai daun salam dan daun pandan, tambahkan garam, masak hingga nasi matang dan harum, nasi uduk siap disajikan."
+            },
+            {
+                name: "Lontong Sayur",
+                image: "images/Lontong_Sayur.jpg",
+                origin: "Jawa",
+                ingredients: "lontong, labu siam, kacang panjang, santan, bawang merah, bawang putih, cabai, lengkuas, daun salam, serai, garam, gula.",
+                tools: "panci, kompor, pisau, talenan, spatula/sendok, mangkuk.",
+                recipe: "potong labu siam dan kacang panjang, haluskan bawang merah bawang putih dan cabai, tumis bumbu hingga harum, masukkan lengkuas daun salam dan serai, tuang santan dan air, masukkan sayuran, tambahkan garam dan gula, masak hingga sayur matang dan kuah mengental, sajikan bersama lontong."
+            },
+            {
+                name: "Babi Guling",
+                image: "images/Babi_Guling.jpg",
+                origin: "Bali",
+                ingredients: "daging babi utuh/potongan besar, bawang putih, bawang merah, ketumbar, kunyit, lengkuas, jahe, serai, daun jeruk, garam, gula, minyak.",
+                tools: "pisau, talenan, baskom, tusuk besi/pemanggang, panggangan/arang, kuas.",
+                recipe: "haluskan bawang putih bawang merah ketumbar kunyit lengkuas dan jahe, campurkan bumbu dengan garam gula dan minyak, lumuri daging babi hingga rata, masukkan serai dan daun jeruk ke bagian dalam daging, diamkan agar bumbu meresap, panggang sambil diputar dan dioles sisa bumbu, bakar hingga matang dan kulit kecokelatan, babi guling siap disajikan."
+            },
+            {
+                name: "Lawar",
+                image: "images/Lawar.jpg",
+                origin: "Bali",
+                ingredients: "daging babi/ayam matang, kelapa parut, bawang merah, bawang putih, cabai, ketumbar, kunyit, lengkuas, kencur, serai, daun jeruk, jeruk nipis, garam, gula.",
+                tools: "pisau, talenan, wajan, kompor, spatula/sendok, baskom.",
+                recipe: "rebus daging hingga matang lalu cincang kecil, sangrai kelapa parut hingga harum, haluskan bawang merah bawang putih cabai ketumbar kunyit lengkuas kencur dan serai, tumis bumbu hingga harum, campurkan daging kelapa dan bumbu, tambahkan daun jeruk dan perasan jeruk nipis, aduk hingga rata dan koreksi rasa, lawar khas Bali siap disajikan."
+            },
+            {
+                name: "Gulai",
+                image: "images/Gulai.jpg",
+                origin: "Sumatera",
+                ingredients: "daging sapi/ayam/ikan, santan, bawang merah, bawang putih, cabai merah, ketumbar, kunyit, jahe, lengkuas, serai, daun jeruk, daun salam, garam, gula.",
+                tools: "panci, kompor, pisau, talenan, spatula/sendok, blender/ulekan.",
+                recipe: "haluskan bawang merah bawang putih cabai ketumbar kunyit jahe dan lengkuas, tumis bumbu hingga harum, masukkan serai daun jeruk dan daun salam, masukkan daging ayam atau ikan, aduk hingga bumbu merata, tuang santan dan air secukupnya, tambahkan garam dan gula, masak dengan api kecil hingga kuah mengental dan bahan matang, gulai khas Sumatra siap disajikan."
+            },
+            {
+                name: "Kari Ayam",
+                image: "images/Kari_Ayam.jpg",
+                origin: "Indonesia (berasal dari India)",
+                ingredients: "ayam, santan, air, bawang merah, bawang putih, cabai merah, ketumbar, kunyit, jahe, lengkuas, serai, daun jeruk, daun salam, bubuk kari, garam, gula, minyak goreng.",
+                tools: "panci, kompor, pisau, talenan, spatula/sendok, blender/ulekan.",
+                recipe: "potong ayam dan cuci bersih, haluskan bawang merah bawang putih cabai ketumbar kunyit jahe dan lengkuas, panaskan minyak lalu tumis bumbu halus hingga harum, masukkan bubuk kari serai daun jeruk dan daun salam, masukkan ayam dan aduk hingga ayam berubah warna, tuang santan dan air secukupnya, tambahkan garam dan gula, masak dengan api kecil hingga ayam empuk dan kuah mengental, kari ayam siap disajikan."
+            },
+            {
+                name: "Sambal",
+                image: "images/Sambal.jpg",
+                origin: "Indonesia umum",
+                ingredients: "cabai merah, cabai rawit, bawang merah, bawang putih, tomat, terasi, garam, gula, minyak goreng.",
+                tools: "cobek/ulekan atau blender, pisau, talenan, wajan, kompor, spatula.",
+                recipe: "goreng cabai bawang tomat dan terasi hingga layu, haluskan semua bahan, tambahkan garam dan gula, aduk hingga rata, panaskan sedikit minyak lalu tumis sambal sebentar, sambal siap disajikan."
+            },
+            {
+                name: "Tempe Mendoan",
+                image: "images/Tempe_mendoan.jpg",
+                origin: "Purwokerto",
+                ingredients: "tempe, tepung terigu, tepung beras, bawang putih, ketumbar, daun bawang, air, garam, minyak goreng.",
+                tools: "pisau, talenan, baskom, wajan, kompor, spatula.",
+                recipe: "iris tempe tipis, haluskan bawang putih dan ketumbar, campurkan tepung terigu tepung beras bumbu halus daun bawang garam dan air, celupkan tempe ke dalam adonan, goreng dalam minyak panas sebentar hingga setengah matang, angkat dan tiriskan, tempe mendoan siap disajikan."
+            },
+            {
+                name: "Kerak Telor",
+                image: "images/Kerak_telor.jpg",
+                origin: "Jakarta",
+                ingredients: "beras ketan, telur ayam/bebek, kelapa parut sangrai, bawang merah goreng, ebi, garam, gula, merica.",
+                tools: "wajan kecil/teflon, kompor, spatula, mangkuk, sendok.",
+                recipe: "rendam beras ketan lalu tiriskan, panaskan wajan dan masukkan beras ketan dengan sedikit air, masak hingga setengah matang, masukkan telur lalu aduk rata, tambahkan ebi garam gula dan merica, masak hingga bagian bawah kering, taburi kelapa sangrai dan bawang goreng, masak hingga matang, kerak telor siap disajikan."
+            },
+            {
+                name: "Bubur Ayam",
+                image: "images/Bubur_ayam.jpg",
+                origin: "Jakarta",
+                ingredients: "beras, air, ayam, bawang putih, bawang merah, jahe, daun salam, serai, garam, minyak goreng.",
+                tools: "panci, kompor, spatula/sendok, pisau, talenan, mangkuk.",
+                recipe: "cuci beras hingga bersih, masak beras dengan air hingga menjadi bubur, rebus ayam bersama bawang putih bawang merah jahe daun salam dan serai hingga matang, suwir ayam, tambahkan garam ke dalam bubur, sajikan bubur dengan ayam suwir di atasnya, bubur ayam Jakarta siap disajikan."
+            },
+            {
+    name: "Arsik Ikan Mas",
+    image: "images/Arsik_Ikan_Mas.jpg",
+    origin: "Sumatra Utara",
+    ingredients: "ikan mas, bawang merah, bawang putih, andaliman, lengkuas, jahe, kunyit, asam patikala, serai, daun bawang, garam, air.",
+    tools: "wajan/panci, kompor, pisau, talenan, spatula/sendok.",
+    recipe: "bersihkan ikan mas dan beri sedikit garam, haluskan bawang merah bawang putih jahe kunyit dan andaliman, tumis bumbu halus hingga harum, masukkan serai lengkuas dan asam patikala, tambahkan air lalu masukkan ikan mas, masak dengan api kecil hingga bumbu meresap dan kuah menyusut, tambahkan daun bawang dan garam secukupnya, arsik ikan mas khas sumatra utara siap disajikan."
+}
+
+        ];
+        if (!localStorage.getItem("foods") || JSON.parse(localStorage.getItem("foods")).length < foods.length) {
+    localStorage.setItem("foods", JSON.stringify(foods));
+}
+
+        const grid = document.getElementById('foodGrid');
+        const searchInput = document.getElementById('searchInput');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalImage = document.getElementById('modalImage');
+        const modalOrigin = document.getElementById('modalOrigin');
+        const modalIngredients = document.getElementById('modalIngredients');
+        const modalTools = document.getElementById('modalTools');
+        const modalRecipe = document.getElementById('modalRecipe');
+
+        function renderFoods() {
+    const storedFoods = JSON.parse(localStorage.getItem("foods"));
+    grid.innerHTML = '';
+
+    storedFoods.forEach((food, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        let deleteButton = "";
+
+if (document.getElementById("adminPanel").style.display === "block") {
+    deleteButton = `<button onclick="deleteFood(${index})">Hapus</button>`;
+}
+
+card.innerHTML = `
+    <img src="${food.image}" alt="${food.name}">
+    <h3 translate="no">${food.name}</h3>
+    ${deleteButton}
+`;
+
+        card.onclick = () => openModal(food);
+        grid.appendChild(card);
+    });
+}
+
+        function openModal(food) {
+            modalTitle.innerHTML = `<span translate="no">${food.name}</span>`;
+            modalImage.src = food.image;
+            modalOrigin.textContent = food.origin;
+            modalIngredients.textContent = food.ingredients;
+            modalTools.textContent = food.tools;
+            modalRecipe.textContent = food.recipe;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        function login() {
+    const user = document.getElementById("username").value;
+    const pass = document.getElementById("password").value;
+
+    if (user === "admin" && pass === "1234") {
+        document.getElementById("adminPanel").style.display = "block";
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("loginStatus").innerText = "Login berhasil!";
+        renderFoods();
+    } else {
+        document.getElementById("loginStatus").innerText = "Username atau password salah!";
+    }
+}
+
+function toggleMenu() {
+    const menu = document.getElementById("menuContent");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+function showAdmin() {
+    document.getElementById("adminPanel").style.display = "block";
+}
+
+
+function addFood() {
+
+    const name = document.getElementById("newName").value;
+    const imageFile = document.getElementById("newImage").files[0];
+    const origin = document.getElementById("newOrigin").value;
+    const ingredients = document.getElementById("newIngredients").value;
+    const tools = document.getElementById("newTools").value;
+    const recipe = document.getElementById("newRecipe").value;
+
+    if (!name || !imageFile || !origin || !ingredients || !tools || !recipe) {
+        alert("Semua kolom harus diisi!");
+        return;
+    }
+
+    convertImageToBase64(imageFile, function(base64Image) {
+
+        const storedFoods = JSON.parse(localStorage.getItem("foods"));
+
+        const newFood = {
+            name: name,
+            image: base64Image,
+            origin: origin,
+            ingredients: ingredients,
+            tools: tools,
+            recipe: recipe
+        };
+
+        storedFoods.push(newFood);
+        localStorage.setItem("foods", JSON.stringify(storedFoods));
+
+        alert("Makanan berhasil ditambahkan!");
+        renderFoods();
+    });
+}
+
+function deleteFood(index) {
+    if (!confirm("Yakin ingin menghapus makanan ini?")) {
+        return;
+    }
+    let storedFoods = JSON.parse(localStorage.getItem("foods"));
+    storedFoods.splice(index, 1);
+    localStorage.setItem("foods", JSON.stringify(storedFoods));
+
+    alert("Makanan berhasil dihapus!");
+    renderFoods();
+}
+
+
+function logout() {
+    document.getElementById("adminPanel").style.display = "none";
+    document.getElementById("loginSection").style.display = "block";
+}
+
+    searchInput.addEventListener('input', () => {
+    const query = searchInput.value.toLowerCase();
+    const storedFoods = JSON.parse(localStorage.getItem("foods"));
+
+    const filtered = storedFoods.filter(food =>
+        food.name.toLowerCase().includes(query)
+    );
+
+    grid.innerHTML = "";
+
+    filtered.forEach((food) => {
+    const index = storedFoods.indexOf(food);
+
+    let deleteButton = "";
+
+    if (document.getElementById("adminPanel").style.display === "block") {
+        deleteButton = `<button onclick="deleteFood(${index})">Hapus</button>`;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+        <img src="${food.image}" alt="${food.name}">
+        <h3>${food.name}</h3>
+        ${deleteButton}
+    `;
+
+    card.onclick = () => openModal(food);
+    grid.appendChild(card);
+});
+});
+
+        renderFoods();
+    </script>
+    <script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'id',
+    includedLanguages: 'en,id',
+    layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+  }, 'google_translate_element');
+}
+function translateToEnglish() {
+  document.getElementById("modal-tools").innerText = "Tools:";
+  document.getElementById("modal-ingredients").innerText = "Ingredients:";
+  document.getElementById("modal-steps").innerText = "Cooking Steps:";
+}
+function convertImageToBase64(file, callback) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        callback(e.target.result);
+    };
+    reader.readAsDataURL(file);
+}
+</script>
+
+<script type="text/javascript" 
+src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+</script>
+
+</body>
+</html>
